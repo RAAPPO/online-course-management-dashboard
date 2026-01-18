@@ -7,7 +7,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CourseService } from '../../services/course.service';
+import { AuthService } from '../../services/auth.service';
+import { EnrollmentService } from '../../services/enrollment.service';
 import { Course } from '../../models/course.model';
 
 @Component({
@@ -21,7 +24,8 @@ import { Course } from '../../models/course.model';
     MatIconModule,
     MatChipsModule,
     MatDividerModule,
-    MatListModule
+    MatListModule,
+    MatSnackBarModule
   ],
   template: `
     <div class="course-detail-container" *ngIf="course">
@@ -91,15 +95,40 @@ import { Course } from '../../models/course.model';
           </div>
 
           <div class="action-buttons">
-            <button mat-raised-button color="primary" routerLink="/enrollment">
+            <!-- Student:  Enroll Button -->
+            <button mat-raised-button color="primary" (click)="enrollInCourse()" 
+                    *ngIf="isStudent() && canEnroll()" [disabled]="isEnrolling">
               <mat-icon>how_to_reg</mat-icon>
-              Enroll Student
+              {{ isEnrolling ? 'Enrolling...' : 'Enroll in Course' }}
             </button>
-            <button mat-raised-button color="accent">
+
+            <!-- Student: Already Enrolled -->
+            <button mat-raised-button disabled *ngIf="isStudent() && isAlreadyEnrolled()">
+              <mat-icon>check_circle</mat-icon>
+              Already Enrolled
+            </button>
+
+            <!-- Student: Course Full -->
+            <button mat-raised-button disabled *ngIf="isStudent() && ! canEnroll() && !isAlreadyEnrolled()">
+              <mat-icon>block</mat-icon>
+              Course Full
+            </button>
+
+            <!-- Admin/Teacher:  Manage Enrollment -->
+            <button mat-raised-button color="primary" routerLink="/enrollment" *ngIf="! isStudent()">
+              <mat-icon>how_to_reg</mat-icon>
+              Manage Enrollment
+            </button>
+
+            <!-- Admin/Teacher: Edit Course -->
+            <button mat-raised-button color="accent" [routerLink]="['/courses', course.id, 'edit']" 
+                    *ngIf="canEditCourse()">
               <mat-icon>edit</mat-icon>
               Edit Course
             </button>
-            <button mat-stroked-button>
+
+            <!-- Share Button (All users) -->
+            <button mat-stroked-button (click)="shareCourse()">
               <mat-icon>share</mat-icon>
               Share
             </button>
@@ -233,8 +262,8 @@ import { Course } from '../../models/course.model';
 
     .course-image {
       position: relative;
-      width:  100%;
-      height: 300px;
+      width: 100%;
+      height:  300px;
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -253,8 +282,8 @@ import { Course } from '../../models/course.model';
       padding: 8px 16px;
       border-radius: 20px;
       font-size:  14px;
-      font-weight: 600;
-      background: #f44336;
+      font-weight:  600;
+      background:  #f44336;
       color: white;
     }
 
@@ -264,7 +293,7 @@ import { Course } from '../../models/course.model';
 
     .course-info h1 {
       font-size: 32px;
-      margin: 0 0 10px 0;
+      margin:  0 0 10px 0;
       color:  #333;
     }
 
@@ -278,7 +307,7 @@ import { Course } from '../../models/course.model';
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 20px;
+      margin-bottom:  20px;
       font-size: 16px;
       color: #555;
     }
@@ -292,45 +321,45 @@ import { Course } from '../../models/course.model';
     }
 
     .level-beginner {
-      background:  #e3f2fd !important;
+      background: #e3f2fd ! important;
       color: #1976d2 !important;
     }
 
     .level-intermediate {
       background: #fff3e0 !important;
-      color: #f57c00 ! important;
+      color: #f57c00 !important;
     }
 
     .level-advanced {
-      background:  #fce4ec !important;
+      background: #fce4ec !important;
       color: #c2185b !important;
     }
 
     .price-chip {
       background: #e8f5e9 !important;
-      color: #2e7d32 !important;
+      color:  #2e7d32 !important;
       font-weight: 600 !important;
     }
 
     .enrollment-stats {
       display: flex;
       gap: 30px;
-      margin-bottom:  20px;
+      margin-bottom: 20px;
     }
 
     .stat {
-      text-align:  center;
+      text-align: center;
     }
 
     .stat h3 {
       font-size: 28px;
-      margin: 0;
+      margin:  0;
       color: #3f51b5;
     }
 
     .stat p {
       margin: 5px 0 0 0;
-      color: #666;
+      color:  #666;
       font-size: 14px;
     }
 
@@ -383,7 +412,7 @@ import { Course } from '../../models/course.model';
     }
 
     mat-icon[mat-card-avatar] {
-      background: #3f51b5;
+      background:  #3f51b5;
       color: white;
       display: flex;
       align-items: center;
@@ -436,7 +465,7 @@ import { Course } from '../../models/course.model';
       margin-bottom: 20px;
     }
 
-    @media (max-width: 968px) {
+    @media (max-width:  968px) {
       .course-header {
         grid-template-columns: 1fr;
       }
@@ -445,20 +474,117 @@ import { Course } from '../../models/course.model';
 })
 export class CourseDetailComponent implements OnInit {
   course: Course | undefined;
+  currentUser: any;
+  isEnrolling = false;
+  myEnrollments: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
-    private courseService: CourseService
+    private router:  Router,
+    private courseService:  CourseService,
+    private authService: AuthService,
+    private enrollmentService: EnrollmentService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
+    this.currentUser = this.authService.getCurrentUser();
     const id = Number(this.route.snapshot.paramMap.get('id'));
+    
     this.courseService.getCourseById(id).subscribe(course => {
       this.course = course;
       if (!course) {
         this.router.navigate(['/courses']);
       }
     });
+
+    // Load student's enrollments if student
+    if (this.isStudent() && this.currentUser) {
+      this.enrollmentService.getEnrollmentsByStudent(this.currentUser.id).subscribe(enrollments => {
+        this.myEnrollments = enrollments;
+      });
+    }
+  }
+
+  isStudent(): boolean {
+    return this.authService.isStudent();
+  }
+
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
+
+  isTeacher(): boolean {
+    return this.authService.isTeacher();
+  }
+
+  canEnroll(): boolean {
+    if (! this.course) return false;
+    return this.course.enrolled < this.course.capacity && !this.isAlreadyEnrolled();
+  }
+
+  isAlreadyEnrolled(): boolean {
+    if (!this.course || !this.currentUser) return false;
+    return this.myEnrollments.some(e => 
+      e.courseId === this.course! .id && e.status !== 'Dropped'
+    );
+  }
+
+  canEditCourse(): boolean {
+    if (this.isAdmin()) return true;
+    if (this.isTeacher() && this.course) {
+      return this.course.teacherId === this.currentUser?.id;
+    }
+    return false;
+  }
+
+  enrollInCourse() {
+    if (! this.currentUser || !this.course || this.isEnrolling) return;
+
+    this.isEnrolling = true;
+
+    const enrollment = {
+      studentId: this.currentUser.id,
+      courseId: this.course.id,
+      enrollmentDate: new Date().toISOString().split('T')[0],
+      status: 'Enrolled' as const,
+      grade: undefined
+    };
+
+    this.enrollmentService.addEnrollment(enrollment).subscribe({
+      next: () => {
+        this.snackBar.open('✅ Successfully enrolled in course! ', 'Close', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top'
+        });
+        this.isEnrolling = false;
+        // Redirect to student dashboard
+        setTimeout(() => {
+          this.router.navigate(['/student-dashboard']);
+        }, 1500);
+      },
+      error:  () => {
+        this.snackBar.open('❌ Enrollment failed. Please try again.', 'Close', {
+          duration: 3000,
+          horizontalPosition:  'end',
+          verticalPosition: 'top'
+        });
+        this.isEnrolling = false;
+      }
+    });
+  }
+
+  shareCourse() {
+    if (this.course) {
+      const url = window.location.href;
+      navigator.clipboard.writeText(url).then(() => {
+        this.snackBar.open('📋 Course link copied to clipboard!', 'Close', {
+          duration: 2000,
+          horizontalPosition:  'end',
+          verticalPosition: 'top'
+        });
+      });
+    }
   }
 }

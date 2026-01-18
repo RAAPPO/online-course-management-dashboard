@@ -70,7 +70,7 @@ import { AuthService } from './services/auth.service';
               <span>{{ currentUser?.email }}</span>
             </div>
             <mat-divider></mat-divider>
-            <button mat-menu-item>
+            <button mat-menu-item routerLink="/settings">
               <mat-icon>settings</mat-icon>
               <span>Settings</span>
             </button>
