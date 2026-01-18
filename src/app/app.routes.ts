@@ -11,23 +11,21 @@ import { AddStudentComponent } from './components/add-student/add-student.compon
 import { EditStudentComponent } from './components/edit-student/edit-student.component';
 import { EnrollmentComponent } from './components/enrollment/enrollment.component';
 import { LoginComponent } from './components/login/login.component';
+import { SettingsComponent } from './components/settings/settings.component';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
-import { SettingsComponent } from './components/settings/settings.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
+  { path: '', redirectTo:  '/login', pathMatch: 'full' },
+  { path:  'login', component: LoginComponent },
   
-  // Admin Dashboard
   { 
     path: 'dashboard', 
     component: DashboardComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['admin'] }
+    canActivate:  [authGuard, roleGuard],
+    data: { roles:  ['admin'] }
   },
   
-  // Student Dashboard
   { 
     path: 'student-dashboard', 
     component:  StudentDashboardComponent,
@@ -35,81 +33,72 @@ export const routes: Routes = [
     data: { roles: ['student'] }
   },
   
-  // Teacher Dashboard
   { 
     path: 'teacher-dashboard', 
-    component: TeacherDashboardComponent,
+    component:  TeacherDashboardComponent,
     canActivate: [authGuard, roleGuard],
     data:  { roles: ['teacher'] }
   },
   
-  // Courses List - All authenticated users
   { 
     path: 'courses', 
     component: CourseListComponent,
-    canActivate: [authGuard]
-  },
-  
-  // Add New Course - Admin & Teacher only
-  { 
-    path:  'courses/new', 
-    component: AddCourseComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['admin', 'teacher'] }
-  },
-  
-  // Course Details - All authenticated users
-  { 
-    path: 'courses/:id', 
-    component: CourseDetailComponent,
     canActivate:  [authGuard]
   },
   
-  // Edit Course - Admin & Teacher only
   { 
-    path: 'courses/: id/edit', 
+    path: 'courses/new', 
+    component: AddCourseComponent,
+    canActivate: [authGuard, roleGuard],
+    data:  { roles: ['admin', 'teacher'] }
+  },
+  
+  { 
+    path:  'courses/:id/edit',  // ✅ FIXED:  Removed space before : id
     component: EditCourseComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['admin', 'teacher'] }
   },
   
-  // Students List - Admin & Teacher
+  { 
+    path: 'courses/: id', 
+    component: CourseDetailComponent,
+    canActivate:  [authGuard]
+  },
+  
   { 
     path: 'students', 
-    component:  StudentListComponent,
+    component: StudentListComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['admin', 'teacher'] }
   },
   
-  // Add Student - Admin & Teacher
   { 
-    path:  'students/new', 
+    path: 'students/new', 
     component: AddStudentComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['admin', 'teacher'] }
+    canActivate:  [authGuard, roleGuard],
+    data: { roles:  ['admin', 'teacher'] }
   },
   
-  // Edit Student - Admin & Teacher
   { 
     path: 'students/:id/edit', 
     component: EditStudentComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['admin', 'teacher'] }
+    canActivate:  [authGuard, roleGuard],
+    data: { roles:  ['admin', 'teacher'] }
   },
   
-  // Enrollment - Admin & Teacher
   { 
     path: 'enrollment', 
     component: EnrollmentComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['admin', 'teacher'] }
   },
-    { 
-  path: 'settings', 
-  component: SettingsComponent,
-  canActivate:  [authGuard]
-},
-  { path: '**', redirectTo: '/login' }
   
-
+  { 
+    path: 'settings', 
+    component: SettingsComponent,
+    canActivate: [authGuard]
+  },
+  
+  { path: '**', redirectTo: '/login' }
 ];

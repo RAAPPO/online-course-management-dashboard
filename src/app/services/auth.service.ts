@@ -4,7 +4,7 @@ import { delay } from 'rxjs/operators';
 import { User } from '../models/user.model';
 
 @Injectable({
-  providedIn:  'root'
+  providedIn: 'root'
 })
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
@@ -13,7 +13,6 @@ export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  // Mock users for testing - COPY THESE CREDENTIALS! 
   private mockUsers: User[] = [
     {
       id: 1,
@@ -30,7 +29,7 @@ export class AuthService {
       id: 2,
       email: 'teacher@school.com',
       password: 'teacher123',
-      firstName:  'John',
+      firstName: 'John',
       lastName: 'Teacher',
       role: 'teacher',
       phone: '+1-555-0002',
@@ -59,23 +58,23 @@ export class AuthService {
     }
   }
 
-  login(email:  string, password: string): Observable<{ success: boolean; message?: string; user?: User }> {
-  const user = this.mockUsers.find(u => u.email === email && u.password === password);
-  
-  if (user) {
-    const userWithoutPassword = { ...user };
-    delete (userWithoutPassword as any).password;
+  login(email: string, password: string): Observable<{ success: boolean; message?: string; user?: User }> {
+    const user = this.mockUsers.find(u => u.email === email && u.password === password);
     
-    localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
-    
-    this.currentUserSubject.next(userWithoutPassword);
-    this.isAuthenticatedSubject.next(true);
-    
-    return of({ success:  true, user: userWithoutPassword }).pipe(delay(500));
-  } else {
-    return of({ success: false, message: 'Invalid email or password' }).pipe(delay(500));
+    if (user) {
+      const userWithoutPassword = { ...user };
+      delete (userWithoutPassword as any).password;
+      
+      localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
+      
+      this.currentUserSubject.next(userWithoutPassword);
+      this.isAuthenticatedSubject.next(true);
+      
+      return of({ success: true, user: userWithoutPassword }).pipe(delay(500));
+    } else {
+      return of({ success: false, message: 'Invalid email or password' }).pipe(delay(500));
+    }
   }
-}
 
   logout(): Observable<void> {
     return new Observable(observer => {
@@ -89,6 +88,55 @@ export class AuthService {
 
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
+  }
+
+  // ✅ NEW:  Update user profile
+  updateUserProfile(userId: number, updates: Partial<User>): Observable<boolean> {
+    return new Observable(observer => {
+      const userIndex = this.mockUsers.findIndex(u => u.id === userId);
+      if (userIndex !== -1) {
+        // Update mock user
+        this.mockUsers[userIndex] = { ...this.mockUsers[userIndex], ...updates };
+        
+        // Update current user if it's the same
+        const currentUser = this.getCurrentUser();
+        if (currentUser && currentUser.id === userId) {
+          const updatedUser = { ...currentUser, ...updates };
+          delete (updatedUser as any).password;
+          localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+          this.currentUserSubject.next(updatedUser);
+        }
+        
+        observer.next(true);
+      } else {
+        observer.next(false);
+      }
+      observer.complete();
+    });
+  }
+
+  // ✅ NEW: Change password
+  changePassword(userId:  number, currentPassword: string, newPassword: string): Observable<{ success: boolean; message:  string }> {
+    return new Observable(observer => {
+      const user = this.mockUsers.find(u => u.id === userId);
+      
+      if (! user) {
+        observer.next({ success: false, message: 'User not found' });
+        observer.complete();
+        return;
+      }
+
+      if (user.password !== currentPassword) {
+        observer.next({ success: false, message:  'Current password is incorrect' });
+        observer.complete();
+        return;
+      }
+
+      // Update password
+      user.password = newPassword;
+      observer.next({ success: true, message: 'Password changed successfully' });
+      observer.complete();
+    });
   }
 
   isAdmin(): boolean {
