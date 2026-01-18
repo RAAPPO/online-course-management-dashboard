@@ -121,8 +121,8 @@ import { Student } from '../../models/student.model';
           </mat-card-content>
 
           <mat-card-actions>
-            <button mat-button color="primary">
-              <mat-icon>visibility</mat-icon>
+            <button mat-button color="primary" [routerLink]="['/students', student.id]">
+              <mat-icon>visibility </mat-icon>
               View Profile
             </button>
             <button mat-button color="accent" [routerLink]="['/students', student.id, 'edit']">

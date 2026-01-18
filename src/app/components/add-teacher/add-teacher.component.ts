@@ -21,25 +21,38 @@ import { TeacherService } from '../../services/teacher.service';
   <div class="add-teacher-container">
     <mat-card>
       <mat-card-header>
-        <mat-card-title>Add Teacher</mat-card-title>
+        <mat-card-title>
+          <mat-icon>person_add</mat-icon>
+          Add New Teacher
+        </mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <form [formGroup]="teacherForm" (ngSubmit)="onSubmit()">
-          <mat-form-field appearance="outline"><mat-label>First Name</mat-label>
-            <input matInput formControlName="firstName"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Last Name</mat-label>
-            <input matInput formControlName="lastName"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Email</mat-label>
-            <input matInput formControlName="email" type="email"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Password</mat-label>
-            <input matInput formControlName="password" type="password"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Phone</mat-label>
-            <input matInput formControlName="phone"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Date of Birth</mat-label>
-            <input matInput formControlName="dateOfBirth" type="date"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Address</mat-label>
-            <input matInput formControlName="address"></mat-form-field>
-          <div style="margin-top:1.5em;text-align:right;">
+          <div class="form-grid">
+            <mat-form-field appearance="outline"><mat-label>First Name</mat-label>
+              <input matInput formControlName="firstName"></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Last Name</mat-label>
+              <input matInput formControlName="lastName"></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Email</mat-label>
+              <input matInput formControlName="email" type="email"></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Password</mat-label>
+              <input matInput formControlName="password" type="password"></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Phone</mat-label>
+              <input matInput formControlName="phone"></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Date of Birth</mat-label>
+              <input matInput formControlName="dateOfBirth" type="date"></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Address</mat-label>
+              <input matInput formControlName="address"></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Qualification</mat-label>
+              <input matInput formControlName="qualification"></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Experience (years)</mat-label>
+              <input matInput formControlName="experience" type="number"></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Subject Specialization</mat-label>
+              <input matInput formControlName="subjectSpecialization"></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Status</mat-label>
+              <input matInput formControlName="status"></mat-form-field>
+          </div>
+          <div style="margin-top:2em;text-align:right;">
             <button mat-raised-button color="primary" type="submit" [disabled]="!teacherForm.valid">
               <mat-icon>save</mat-icon> Add Teacher
             </button>
@@ -49,11 +62,20 @@ import { TeacherService } from '../../services/teacher.service';
     </mat-card>
   </div>
   `,
-  styles: [`.add-teacher-container { max-width:600px; margin:32px auto; }`]
+  styles: [`
+    .add-teacher-container { max-width:700px; margin:32px auto; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    @media (max-width:600px) { .form-grid { grid-template-columns:1fr; } }
+  `]
 })
 export class AddTeacherComponent {
   teacherForm: FormGroup;
-  constructor(private fb: FormBuilder, private teacherService: TeacherService, private router: Router, private snackBar: MatSnackBar) {
+  constructor(
+    private fb: FormBuilder,
+    private teacherService: TeacherService,
+    private router: Router,
+    private snackBar: MatSnackBar
+  ) {
     this.teacherForm = this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
@@ -61,7 +83,11 @@ export class AddTeacherComponent {
       password: ['', [Validators.required, Validators.minLength(4)]],
       phone: [''],
       dateOfBirth: [''],
-      address: ['']
+      address: [''],
+      qualification: [''],
+      experience: [''],
+      subjectSpecialization: [''],
+      status: ['Active']
     });
   }
   onSubmit() {

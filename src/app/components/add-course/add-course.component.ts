@@ -13,6 +13,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CourseService } from '../../services/course.service';
 import { AuthService } from '../../services/auth.service';
+import { TeacherService } from '../../services/teacher.service';
+import { Teacher } from '../../models/teacher.model';
 
 @Component({
   selector: 'app-add-course',
@@ -72,18 +74,17 @@ import { AuthService } from '../../services/auth.service';
             <div class="form-row">
               <mat-form-field appearance="outline">
                 <mat-label>Instructor</mat-label>
-                <mat-select formControlName="instructor" [disabled]="isTeacher()">
-                  <mat-option value="John Teacher">John Teacher</mat-option>
-                  <mat-option value="Dr. Emily Chen">Dr. Emily Chen</mat-option>
-                  <mat-option value="Prof. David Wilson">Prof. David Wilson</mat-option>
-                  <mat-option value="Dr. Lisa Anderson">Dr. Lisa Anderson</mat-option>
+                <mat-select formControlName="teacherId" [disabled]="isTeacher()">
+                  <mat-option *ngFor="let t of teachers" [value]="t.id">
+                    {{ t.firstName }} {{ t.lastName }} ({{ t.email }})
+                  </mat-option>
                 </mat-select>
-                <mat-error *ngIf="courseForm.get('instructor')?.hasError('required')">
+                <mat-error *ngIf="courseForm.get('teacherId')?.hasError('required')">
                   Instructor is required
                 </mat-error>
                 <mat-hint *ngIf="isTeacher()">Auto-filled with your name</mat-hint>
               </mat-form-field>
-
+              
               <mat-form-field appearance="outline">
                 <mat-label>Category</mat-label>
                 <mat-select formControlName="category">
@@ -190,58 +191,38 @@ import { AuthService } from '../../services/auth.service';
       max-width: 900px;
       margin: 0 auto;
     }
-
-    mat-card {
-      padding: 20px;
-    }
-
-    mat-card-header {
-      margin-bottom: 30px;
-    }
-
+    mat-card { padding: 20px; }
+    mat-card-header { margin-bottom: 30px; }
     mat-card-title {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 24px !  important;
+      font-size: 24px !important;
       color: #333;
     }
-
-    .form-row {
-      display:   grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    .full-width {
-      width: 100%;
-    }
-
-    mat-form-field {
-      width: 100%;
-    }
-
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .full-width { width: 100%; }
+    mat-form-field { width: 100%; }
     .form-actions {
-      display:   flex;
+      display: flex;
       justify-content: flex-end;
       gap: 15px;
-      margin-top:  30px;
+      margin-top: 30px;
     }
-
     @media (max-width: 768px) {
-      .form-row {
-        grid-template-columns: 1fr;
-      }
+      .form-row { grid-template-columns: 1fr; }
     }
   `]
 })
 export class AddCourseComponent implements OnInit {
-  courseForm:   FormGroup;
+  courseForm: FormGroup;
   currentUser: any;
+  teachers: Teacher[] = [];
 
   constructor(
-    private fb:   FormBuilder,
+    private fb: FormBuilder,
     private courseService: CourseService,
+    private teacherService: TeacherService,
     private authService: AuthService,
     private router: Router,
     private snackBar: MatSnackBar
@@ -250,7 +231,7 @@ export class AddCourseComponent implements OnInit {
       title: ['', Validators.required],
       code: ['', Validators.required],
       description: ['', Validators.required],
-      instructor: ['', Validators.required],
+      teacherId: ['', Validators.required],
       category: ['', Validators.required],
       level: ['', Validators.required],
       duration: ['', [Validators.required, Validators.min(1)]],
@@ -264,14 +245,16 @@ export class AddCourseComponent implements OnInit {
 
   ngOnInit() {
     this.currentUser = this.authService.getCurrentUser();
-    
-    // If teacher, auto-fill their name and set teacherId
-    if (this.isTeacher() && this.currentUser) {
-      const teacherName = `${this.currentUser.firstName} ${this.currentUser.lastName}`;
-      this.courseForm.patchValue({
-        instructor: teacherName
-      });
-    }
+
+    this.teacherService.getTeachers().subscribe(list => {
+      this.teachers = list;
+      // Auto-fill (disable dropdown) if user is teacher
+      if (this.isTeacher() && this.currentUser) {
+        this.courseForm.patchValue({
+          teacherId: this.currentUser.id
+        });
+      }
+    });
   }
 
   isTeacher(): boolean {
@@ -285,7 +268,7 @@ export class AddCourseComponent implements OnInit {
         ...formValue,
         enrolled: 0,
         status: 'Active',
-        teacherId: this.isTeacher() ? this.currentUser?.id : undefined,
+        teacherId: formValue.teacherId,
         startDate: this.formatDate(formValue.startDate),
         endDate: this.formatDate(formValue.endDate),
         syllabus: []
@@ -293,7 +276,7 @@ export class AddCourseComponent implements OnInit {
 
       this.courseService.addCourse(newCourse).subscribe(() => {
         this.snackBar.open('✅ Course added successfully!', 'Close', {
-          duration:   3000,
+          duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
         });
@@ -308,7 +291,7 @@ export class AddCourseComponent implements OnInit {
     }
   }
 
-  private formatDate(date:   Date): string {
+  private formatDate(date: Date): string {
     const d = new Date(date);
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');

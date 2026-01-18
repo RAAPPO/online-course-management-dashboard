@@ -16,6 +16,9 @@ import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
 import { TeacherListComponent } from './components/teacher-list/teacher-list.component';
 import { AddTeacherComponent } from './components/add-teacher/add-teacher.component';
+import { EditTeacherComponent } from './components/edit-teacher/edit-teacher.component';
+import { TeacherDetailComponent } from './components/teacher-detail/teacher-detail.component';
+import { StudentDetailComponent } from './components/student-detail/student-detail.component';
 
 export const routes: Routes = [
   { path: '', redirectTo:  '/login', pathMatch: 'full' },
@@ -82,6 +85,12 @@ export const routes: Routes = [
     data: { roles:  ['admin', 'teacher'] }
   },
   
+    {
+  path: 'students/:id',
+  component: StudentDetailComponent,
+  canActivate: [authGuard, roleGuard],
+  data: { roles: ['admin', 'teacher'] }
+},
   { 
     path: 'students/:id/edit', 
     component: EditStudentComponent,
@@ -89,6 +98,7 @@ export const routes: Routes = [
     data: { roles:  ['admin', 'teacher'] }
   },
   
+
   { 
     path: 'enrollment', 
     component: EnrollmentComponent,
@@ -105,6 +115,18 @@ export const routes: Routes = [
   {
     path: 'teachers/new',
     component: AddTeacherComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['admin'] }
+  },
+  {
+    path: 'teachers/:id',
+    component: TeacherDetailComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['admin'] }
+  },
+  {
+    path: 'teachers/:id/edit',
+    component: EditTeacherComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['admin'] }
   },
