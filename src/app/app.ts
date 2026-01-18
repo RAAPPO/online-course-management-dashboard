@@ -45,6 +45,11 @@ import { AuthService } from './services/auth.service';
     <mat-icon>people</mat-icon>
     <span>Students</span>
   </a>
+  <!-- TEACHERS MANAGEMENT, Admin only! -->
+  <a mat-button routerLink="/teachers" routerLinkActive="active-link" *ngIf="isAdmin()">
+    <mat-icon>groups</mat-icon>
+    <span>Teachers</span>
+  </a>
   <a mat-button routerLink="/enrollment" routerLinkActive="active-link" *ngIf="isAdmin() || isTeacher()">
     <mat-icon>how_to_reg</mat-icon>
     <span>Enrollment</span>
@@ -316,9 +321,9 @@ export class AppComponent {
   }
 
   getDashboardRoute(): string {
-  if (this.isAdmin()) return '/dashboard';
-  if (this.isTeacher()) return '/teacher-dashboard';
-  if (this.isStudent()) return '/student-dashboard';
-  return '/login';
-}
+    if (this.isAdmin()) return '/dashboard';
+    if (this.isTeacher()) return '/teacher-dashboard';
+    if (this.isStudent()) return '/student-dashboard';
+    return '/login';
+  }
 }

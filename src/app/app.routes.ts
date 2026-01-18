@@ -14,6 +14,8 @@ import { LoginComponent } from './components/login/login.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
+import { TeacherListComponent } from './components/teacher-list/teacher-list.component';
+import { AddTeacherComponent } from './components/add-teacher/add-teacher.component';
 
 export const routes: Routes = [
   { path: '', redirectTo:  '/login', pathMatch: 'full' },
@@ -93,6 +95,20 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { roles: ['admin', 'teacher'] }
   },
+
+  {
+    path: 'teachers',
+    component: TeacherListComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['admin'] }
+  },
+  {
+    path: 'teachers/new',
+    component: AddTeacherComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['admin'] }
+  },
+
   
   { 
     path: 'settings', 
