@@ -61,7 +61,7 @@ export const routes: Routes = [
   },
   
   { 
-    path: 'courses/: id', 
+    path: 'courses/:id', 
     component: CourseDetailComponent,
     canActivate:  [authGuard]
   },

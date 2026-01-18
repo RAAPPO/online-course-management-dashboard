@@ -536,10 +536,6 @@ createNewCourse() {
 }
 
 editCourse(course: Course) {
-  this.snackBar.open('ℹ️ Use Courses page → Edit button', 'Close', {
-    duration: 3000,
-    horizontalPosition: 'end',
-    verticalPosition: 'top'
-  });
+  this.router.navigate(['/courses', course.id, 'edit']);
 }
 }
