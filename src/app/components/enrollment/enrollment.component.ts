@@ -12,6 +12,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CourseService } from '../../services/course.service';
 import { StudentService } from '../../services/student.service';
 import { EnrollmentService } from '../../services/enrollment.service';
+import { AuthService } from '../../services/auth.service';
 import { Course } from '../../models/course.model';
 import { Student } from '../../models/student.model';
 import { Enrollment } from '../../models/enrollment.model';
@@ -66,6 +67,7 @@ import { Enrollment } from '../../models/enrollment.model';
               <mat-error *ngIf="enrollmentForm.get('courseId')?.hasError('required')">
                 Please select a course
               </mat-error>
+              <mat-hint *ngIf="isTeacher()">Only your courses are shown</mat-hint>
             </mat-form-field>
 
             <button mat-raised-button color="primary" type="submit" 
@@ -156,7 +158,7 @@ import { Enrollment } from '../../models/enrollment.model';
 
             <div *ngIf="enrichedEnrollments.length === 0" class="no-data">
               <mat-icon>info</mat-icon>
-              <p>No enrollments yet.  Enroll a student in a course to get started!</p>
+              <p>No enrollments yet. Enroll a student in a course to get started! </p>
             </div>
           </div>
         </mat-card-content>
@@ -166,7 +168,7 @@ import { Enrollment } from '../../models/enrollment.model';
   styles: [`
     .enrollment-container {
       padding: 32px;
-      max-width:  1400px;
+      max-width:   1400px;
       margin: 0 auto;
       display: grid;
       gap: 24px;
@@ -185,7 +187,7 @@ import { Enrollment } from '../../models/enrollment.model';
       align-items: center;
       gap: 10px;
       font-size: 22px ! important;
-      color: #333;
+      color:  #333;
     }
 
     .enrollment-form form {
@@ -229,17 +231,17 @@ import { Enrollment } from '../../models/enrollment.model';
 
     .status-enrolled {
       background-color: #4CAF50;
-      color:  white;
+      color:   white;
     }
 
     .status-completed {
       background-color: #2196F3;
-      color: white;
+      color:  white;
     }
 
     .status-dropped {
       background-color: #f44336;
-      color: white;
+      color:  white;
     }
 
     .grade {
@@ -249,7 +251,7 @@ import { Enrollment } from '../../models/enrollment.model';
     }
 
     .no-grade {
-      color:  #999;
+      color:   #999;
     }
 
     .no-data {
@@ -262,7 +264,7 @@ import { Enrollment } from '../../models/enrollment.model';
       font-size: 48px;
       width: 48px;
       height: 48px;
-      margin-bottom: 10px;
+      margin-bottom:  10px;
     }
 
     @media (max-width: 768px) {
@@ -273,7 +275,7 @@ import { Enrollment } from '../../models/enrollment.model';
   `]
 })
 export class EnrollmentComponent implements OnInit {
-  enrollmentForm: FormGroup;
+  enrollmentForm:  FormGroup;
   students: Student[] = [];
   courses: Course[] = [];
   enrollments: Enrollment[] = [];
@@ -281,10 +283,11 @@ export class EnrollmentComponent implements OnInit {
   displayedColumns: string[] = ['student', 'course', 'enrollmentDate', 'status', 'grade', 'actions'];
 
   constructor(
-    private fb: FormBuilder,
+    private fb:  FormBuilder,
     private studentService: StudentService,
     private courseService: CourseService,
     private enrollmentService: EnrollmentService,
+    private authService: AuthService,
     private snackBar: MatSnackBar
   ) {
     this.enrollmentForm = this.fb.group({
@@ -297,13 +300,24 @@ export class EnrollmentComponent implements OnInit {
     this.loadData();
   }
 
+  isTeacher(): boolean {
+    return this.authService.isTeacher();
+  }
+
   loadData() {
     this.studentService.getStudents().subscribe(students => {
       this.students = students;
     });
 
     this.courseService.getCourses().subscribe(courses => {
-      this.courses = courses;
+      // Filter courses for teachers - only show their own courses
+      if (this.authService.isTeacher()) {
+        const currentUser = this.authService.getCurrentUser();
+        this.courses = courses.filter(c => c.teacherId === currentUser?.id);
+      } else {
+        // Admin sees all courses
+        this.courses = courses;
+      }
     });
 
     this.enrollmentService.getEnrollments().subscribe(enrollments => {
@@ -333,11 +347,11 @@ export class EnrollmentComponent implements OnInit {
 
       // Check if already enrolled
       const alreadyEnrolled = this.enrollments.some(
-        e => e.studentId === studentId && e.courseId === courseId
+        e => e.studentId === studentId && e.courseId === courseId && e.status !== 'Dropped'
       );
 
       if (alreadyEnrolled) {
-        this.snackBar.open('⚠️ Student is already enrolled in this course! ', 'Close', {
+        this.snackBar.open('⚠️ Student is already enrolled in this course!  ', 'Close', {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -365,10 +379,10 @@ export class EnrollmentComponent implements OnInit {
     }
   }
 
-  onUnenroll(enrollmentId:  number) {
+  onUnenroll(enrollmentId:   number) {
     if (confirm('Are you sure you want to unenroll this student?')) {
       this.enrollmentService.deleteEnrollment(enrollmentId).subscribe(() => {
-        this.snackBar.open('✅ Student unenrolled successfully!', 'Close', {
+        this.snackBar.open('✅ Student unenrolled successfully! ', 'Close', {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,6 +12,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CourseService } from '../../services/course.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-add-course',
@@ -71,10 +72,16 @@ import { CourseService } from '../../services/course.service';
             <div class="form-row">
               <mat-form-field appearance="outline">
                 <mat-label>Instructor</mat-label>
-                <input matInput formControlName="instructor" placeholder="e.g., Dr. John Smith">
+                <mat-select formControlName="instructor" [disabled]="isTeacher()">
+                  <mat-option value="John Teacher">John Teacher</mat-option>
+                  <mat-option value="Dr. Emily Chen">Dr. Emily Chen</mat-option>
+                  <mat-option value="Prof. David Wilson">Prof. David Wilson</mat-option>
+                  <mat-option value="Dr. Lisa Anderson">Dr. Lisa Anderson</mat-option>
+                </mat-select>
                 <mat-error *ngIf="courseForm.get('instructor')?.hasError('required')">
                   Instructor is required
                 </mat-error>
+                <mat-hint *ngIf="isTeacher()">Auto-filled with your name</mat-hint>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
@@ -167,7 +174,7 @@ import { CourseService } from '../../services/course.service';
                 Cancel
               </button>
               <button mat-raised-button color="primary" type="submit" 
-                [disabled]="!courseForm.valid">
+                [disabled]="! courseForm.valid">
                 <mat-icon>save</mat-icon>
                 Save Course
               </button>
@@ -196,12 +203,12 @@ import { CourseService } from '../../services/course.service';
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 24px ! important;
+      font-size: 24px !  important;
       color: #333;
     }
 
     .form-row {
-      display:  grid;
+      display:   grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
     }
@@ -215,10 +222,10 @@ import { CourseService } from '../../services/course.service';
     }
 
     .form-actions {
-      display:  flex;
+      display:   flex;
       justify-content: flex-end;
       gap: 15px;
-      margin-top: 30px;
+      margin-top:  30px;
     }
 
     @media (max-width: 768px) {
@@ -228,12 +235,14 @@ import { CourseService } from '../../services/course.service';
     }
   `]
 })
-export class AddCourseComponent {
-  courseForm:  FormGroup;
+export class AddCourseComponent implements OnInit {
+  courseForm:   FormGroup;
+  currentUser: any;
 
   constructor(
-    private fb:  FormBuilder,
+    private fb:   FormBuilder,
     private courseService: CourseService,
+    private authService: AuthService,
     private router: Router,
     private snackBar: MatSnackBar
   ) {
@@ -253,6 +262,22 @@ export class AddCourseComponent {
     });
   }
 
+  ngOnInit() {
+    this.currentUser = this.authService.getCurrentUser();
+    
+    // If teacher, auto-fill their name and set teacherId
+    if (this.isTeacher() && this.currentUser) {
+      const teacherName = `${this.currentUser.firstName} ${this.currentUser.lastName}`;
+      this.courseForm.patchValue({
+        instructor: teacherName
+      });
+    }
+  }
+
+  isTeacher(): boolean {
+    return this.authService.isTeacher();
+  }
+
   onSubmit() {
     if (this.courseForm.valid) {
       const formValue = this.courseForm.value;
@@ -260,6 +285,7 @@ export class AddCourseComponent {
         ...formValue,
         enrolled: 0,
         status: 'Active',
+        teacherId: this.isTeacher() ? this.currentUser?.id : undefined,
         startDate: this.formatDate(formValue.startDate),
         endDate: this.formatDate(formValue.endDate),
         syllabus: []
@@ -267,7 +293,7 @@ export class AddCourseComponent {
 
       this.courseService.addCourse(newCourse).subscribe(() => {
         this.snackBar.open('✅ Course added successfully!', 'Close', {
-          duration:  3000,
+          duration:   3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
         });
@@ -277,12 +303,12 @@ export class AddCourseComponent {
   }
 
   onCancel() {
-    if (confirm('Are you sure you want to cancel?  All changes will be lost.')) {
+    if (confirm('Are you sure you want to cancel?   All changes will be lost.')) {
       this.router.navigate(['/courses']);
     }
   }
 
-  private formatDate(date:  Date): string {
+  private formatDate(date:   Date): string {
     const d = new Date(date);
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
