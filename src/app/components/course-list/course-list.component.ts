@@ -14,7 +14,11 @@ import { CourseService } from '../../services/course.service';
 import { Course } from '../../models/course.model';
 import { FilterCoursePipe } from '../../pipes/filter-course.pipe';
 import { AuthService } from '../../services/auth.service';
-import { HighlightPopularDirective } from '../../directives/highlight-popular'; 
+
+// IMPORTS FOR DIRECTIVE & DIALOG
+import { HighlightPopularDirective } from '../../directives/highlight-popular';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-course-list',
@@ -32,8 +36,8 @@ import { HighlightPopularDirective } from '../../directives/highlight-popular';
     MatChipsModule,
     MatSnackBarModule,
     FilterCoursePipe,
-    // 2. ADD TO IMPORTS ARRAY
-    HighlightPopularDirective 
+    HighlightPopularDirective, // Directive is here
+    MatDialogModule            // Dialog module is here
   ],
   template: `
     <div class="course-list-container">
@@ -211,7 +215,7 @@ import { HighlightPopularDirective } from '../../directives/highlight-popular';
 
     .course-card {
       transition: all 0.3s;
-      overflow: visible !important; /* Changed to visible for badge */
+      overflow: visible !important;
     }
 
     .course-card:hover {
@@ -413,7 +417,8 @@ export class CourseListComponent implements OnInit {
   constructor(
     private courseService:  CourseService,
     private snackBar: MatSnackBar,
-    private authService: AuthService
+    private authService: AuthService,
+    private dialog: MatDialog // <--- INJECTED DIALOG
   ) {}
 
   isAdmin(): boolean {
@@ -472,27 +477,29 @@ export class CourseListComponent implements OnInit {
       return;
     }
 
-    const confirmMessage = `⚠️ DELETE COURSE\n\n` +
-      `Course: ${course.title}\n` +
-      `Code: ${course.code}\n` +
-      `Instructor: ${course.instructor}\n` +
-      `Enrolled Students: ${course.enrolled}\n\n` +
-      `This will affect ${course.enrolled} students and cannot be undone!\n\n` +
-      `Are you sure you want to continue? `;
-    
-    if (confirm(confirmMessage)) {
-      this.courseService.deleteCourse(course.id).subscribe(() => {
-        this.snackBar.open(`✅ Course "${course.title}" deleted successfully! `, 'Close', {
-          duration: 3000,
-          horizontalPosition: 'end',
-          verticalPosition: 'top'
+    // UPDATED: Using Material Dialog
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Delete Course',
+        message: `Are you sure you want to delete "${course.title}"? This action involves ${course.enrolled} enrolled students and cannot be undone.`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.courseService.deleteCourse(course.id).subscribe(() => {
+          this.snackBar.open(`✅ Course "${course.title}" deleted successfully! `, 'Close', {
+            duration: 3000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top'
+          });
+          
+          // Reload courses
+          this.courseService.getCourses().subscribe(courses => {
+            this.courses = courses;
+          });
         });
-        
-        // Reload courses
-        this.courseService.getCourses().subscribe(courses => {
-          this.courses = courses;
-        });
-      });
-    }
+      }
+    });
   }
 }

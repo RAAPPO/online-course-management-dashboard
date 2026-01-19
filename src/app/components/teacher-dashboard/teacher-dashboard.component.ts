@@ -18,6 +18,8 @@ import { EnrollmentService } from '../../services/enrollment.service';
 import { Course } from '../../models/course.model';
 import { Student } from '../../models/student.model';
 import { Enrollment } from '../../models/enrollment.model';
+// IMPORTS FOR DIALOG
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -42,7 +44,6 @@ import { Enrollment } from '../../models/enrollment.model';
         <p>Manage your courses and students</p>
       </div>
 
-      <!-- Stats Cards -->
       <div class="stats-grid">
         <mat-card class="stat-card courses">
           <mat-icon>school</mat-icon>
@@ -77,7 +78,6 @@ import { Enrollment } from '../../models/enrollment.model';
         </mat-card>
       </div>
 
-      <!-- My Courses -->
       <mat-card class="section-card">
         <mat-card-header>
           <mat-card-title>📚 My Courses</mat-card-title>
@@ -122,7 +122,6 @@ import { Enrollment } from '../../models/enrollment.model';
         </mat-card-content>
       </mat-card>
 
-      <!-- Course Details (when selected) -->
       <mat-card class="section-card" *ngIf="selectedCourse">
         <mat-card-header>
           <mat-card-title>
@@ -434,7 +433,8 @@ export class TeacherDashboardComponent implements OnInit {
     private studentService: StudentService,
     private enrollmentService: EnrollmentService,
     private snackBar: MatSnackBar,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog // <--- INJECTED DIALOG
   ) {}
 
   ngOnInit() {
@@ -443,20 +443,16 @@ export class TeacherDashboardComponent implements OnInit {
   }
 
   loadData() {
-    // Load courses taught by this teacher
     this.courseService.getCourses().subscribe(courses => {
-      // Filter by teacherId
       if (this.currentUser) {
         this.myCourses = courses.filter(c => c.teacherId === this.currentUser.id);
       }
     });
 
-    // Load all students
     this.studentService.getStudents().subscribe(students => {
       this.allStudents = students;
     });
 
-    // Load enrollments
     this.enrollmentService.getEnrollments().subscribe(enrollments => {
       this.allEnrollments = enrollments;
       this.calculateStats();
@@ -505,37 +501,48 @@ export class TeacherDashboardComponent implements OnInit {
     });
   }
 
-removeStudent(enrollment: Enrollment) {
-  if (confirm('Remove this student from the course?')) {
-    this.enrollmentService.deleteEnrollment(enrollment.id).subscribe({
-      next: () => {
-        this.snackBar.open('✅ Student removed successfully', 'Close', {
-          duration: 2000,
-          horizontalPosition: 'end',
-          verticalPosition: 'top'
-        });
-        this.loadData();
-        if (this.selectedCourse) {
-          this.viewCourseDetails(this.selectedCourse);
-        }
-      },
-      error: () => {
-        this.snackBar.open('❌ Failed to remove student', 'Close', {
-          duration: 3000
+  removeStudent(enrollment: Enrollment) {
+    // UPDATED: Using Material Dialog
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Remove Student',
+        message: 'Are you sure you want to remove this student from the course? This action cannot be undone.'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.enrollmentService.deleteEnrollment(enrollment.id).subscribe({
+          next: () => {
+            this.snackBar.open('✅ Student removed successfully', 'Close', {
+              duration: 2000,
+              horizontalPosition: 'end',
+              verticalPosition: 'top'
+            });
+            this.loadData();
+            if (this.selectedCourse) {
+              this.viewCourseDetails(this.selectedCourse); // Refresh the table
+            }
+          },
+          error: () => {
+            this.snackBar.open('❌ Failed to remove student', 'Close', {
+              duration: 3000
+            });
+          }
         });
       }
     });
   }
-}
-createNewCourse() {
-  this.snackBar. open('ℹ️ Use Courses page → Add Course button', 'Close', {
-    duration: 3000,
-    horizontalPosition:  'end',
-    verticalPosition: 'top'
-  });
-}
 
-editCourse(course: Course) {
-  this.router.navigate(['/courses', course.id, 'edit']);
-}
+  createNewCourse() {
+    this.snackBar. open('ℹ️ Use Courses page → Add Course button', 'Close', {
+      duration: 3000,
+      horizontalPosition:  'end',
+      verticalPosition: 'top'
+    });
+  }
+
+  editCourse(course: Course) {
+    this.router.navigate(['/courses', course.id, 'edit']);
+  }
 }
