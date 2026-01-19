@@ -19,6 +19,7 @@ import { AddTeacherComponent } from './components/add-teacher/add-teacher.compon
 import { EditTeacherComponent } from './components/edit-teacher/edit-teacher.component';
 import { TeacherDetailComponent } from './components/teacher-detail/teacher-detail.component';
 import { StudentDetailComponent } from './components/student-detail/student-detail.component';
+import { ContactComponent } from './components/contact/contact.component';
 
 export const routes: Routes = [
   { path: '', redirectTo:  '/login', pathMatch: 'full' },
@@ -137,6 +138,7 @@ export const routes: Routes = [
     component: SettingsComponent,
     canActivate: [authGuard]
   },
+  { path: 'contact', component: ContactComponent },
   
   { path: '**', redirectTo: '/login' }
 ];

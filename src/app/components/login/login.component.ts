@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -21,7 +21,8 @@ import { AuthService } from '../../services/auth.service';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    RouterLink
   ],
   template: `
     <div class="login-container">
@@ -85,9 +86,10 @@ import { AuthService } from '../../services/auth.service';
           </div>
         </mat-card-content>
 
-        <mat-card-footer>
-          <p class="footer-text">© 2026 Course Management System</p>
-        </mat-card-footer>
+          <div class="footer-content">
+            <a mat-button color="primary" routerLink="/contact">Need Help? Contact Us</a>
+            <p class="footer-text">© 2026 Course Management System</p>
+          </div>
       </mat-card>
     </div>
   `,
@@ -209,6 +211,14 @@ import { AuthService } from '../../services/auth.service';
     mat-card-footer {
       padding: 20px;
       background: #fafafa;
+    }
+
+    .footer-content {
+     display: flex;
+     flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
     }
 
     .footer-text {
