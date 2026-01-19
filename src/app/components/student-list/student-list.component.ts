@@ -13,7 +13,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { StudentService } from '../../services/student.service';
 import { Student } from '../../models/student.model';
-
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog';
 @Component({
   selector: 'app-student-list',
   standalone: true,
@@ -29,7 +30,8 @@ import { Student } from '../../models/student.model';
     MatInputModule,
     MatChipsModule,
     MatSelectModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatDialogModule
   ],
   template:  `
     <div class="student-list-container">
@@ -304,7 +306,8 @@ export class StudentListComponent implements OnInit {
 
   constructor(
     private studentService: StudentService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -337,24 +340,27 @@ export class StudentListComponent implements OnInit {
   }
 
 deleteStudent(student: Student) {
-  const confirmMessage = `⚠️ DELETE STUDENT\n\n` +
-    `Student: ${student.firstName} ${student.lastName}\n` +
-    `Email: ${student.email}\n` +
-    `Major: ${student.major}\n` +
-    `Status: ${student.status}\n\n` +
-    `This will remove all enrollment records and cannot be undone!\n\n` +
-    `Are you sure you want to continue? `;
-  
-  if (confirm(confirmMessage)) {
-    this.studentService.deleteStudent(student.id).subscribe(() => {
-      this.snackBar.open(`✅ Student "${student.firstName} ${student.lastName}" deleted successfully! `, 'Close', {
-        duration: 3000,
-        horizontalPosition: 'end',
-        verticalPosition: 'top'
+  // 1. Open the dialog
+  const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    data: {
+      title: 'Delete Student',
+      message: `Are you sure you want to delete ${student.firstName} ${student.lastName}? This action cannot be undone.`
+    }
+  });
+
+  // 2. Wait for the result
+  dialogRef.afterClosed().subscribe(result => {
+    if (result === true) {
+      // 3. User clicked "Delete" - Proceed with deletion
+      this.studentService.deleteStudent(student.id).subscribe(() => {
+        this.snackBar.open('✅ Student deleted successfully!', 'Close', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top'
+        });
+        this.loadStudents();
       });
-      
-      this.loadStudents();
-    });
-  }
+    }
+  });
 }
 }

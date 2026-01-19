@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:online-course-management-dashboard": "node dist/online-course-management-dashboard/server/server.mjs"
+    "serve:ssr:online-course-management-dashboard": "node dist/online-course-management-dashboard/server/server.mjs",
+    "server": "json-server --watch db.json --port 3000"
   },
   "prettier": {
     "printWidth": 100,
@@ -47,6 +48,7 @@
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.19.29",
     "jasmine-core": "~5.9.0",
+    "json-server": "^0.17.4",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",

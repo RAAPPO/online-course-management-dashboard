@@ -14,6 +14,7 @@ import { CourseService } from '../../services/course.service';
 import { Course } from '../../models/course.model';
 import { FilterCoursePipe } from '../../pipes/filter-course.pipe';
 import { AuthService } from '../../services/auth.service';
+import { HighlightPopularDirective } from '../../directives/highlight-popular'; 
 
 @Component({
   selector: 'app-course-list',
@@ -30,7 +31,9 @@ import { AuthService } from '../../services/auth.service';
     MatSelectModule,
     MatChipsModule,
     MatSnackBarModule,
-    FilterCoursePipe
+    FilterCoursePipe,
+    // 2. ADD TO IMPORTS ARRAY
+    HighlightPopularDirective 
   ],
   template: `
     <div class="course-list-container">
@@ -78,7 +81,10 @@ import { AuthService } from '../../services/auth.service';
       </div>
 
       <div class="courses-grid">
-        <mat-card *ngFor="let course of courses | filterCourse: searchTerm:  selectedCategory: selectedLevel" class="course-card">
+        <mat-card *ngFor="let course of courses | filterCourse: searchTerm: selectedCategory: selectedLevel" 
+                  class="course-card"
+                  [appHighlightPopular]="course.enrolled">
+                  
           <div class="course-image">
             <img [src]="course.imageUrl" [alt]="course.title">
             <span class="status-badge" [class.active]="course.status === 'Active'">
@@ -205,7 +211,7 @@ import { AuthService } from '../../services/auth.service';
 
     .course-card {
       transition: all 0.3s;
-      overflow: hidden;
+      overflow: visible !important; /* Changed to visible for badge */
     }
 
     .course-card:hover {
