@@ -18,7 +18,6 @@ import { MessageService } from '../../services/message.service'; // <-- Import S
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,

@@ -366,5 +366,15 @@
       "id": 6
     }
   ],
-  "messages": []
+  "messages": [
+    {
+      "name": "Alice Student",
+      "email": "student@school.com",
+      "subject": "General Inquiry",
+      "message": "GF",
+      "date": "2026-01-19T07:44:44.646Z",
+      "status": "Resolved",
+      "id": 1
+    }
+  ]
 }

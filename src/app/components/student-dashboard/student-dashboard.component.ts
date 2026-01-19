@@ -12,6 +12,7 @@ import { CourseService } from '../../services/course.service';
 import { EnrollmentService } from '../../services/enrollment.service';
 import { Course } from '../../models/course.model';
 import { Enrollment } from '../../models/enrollment.model';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -24,7 +25,8 @@ import { Enrollment } from '../../models/enrollment.model';
     MatChipsModule,
     MatTableModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    RouterLink
   ],
   template: `
     <div class="student-dashboard">
