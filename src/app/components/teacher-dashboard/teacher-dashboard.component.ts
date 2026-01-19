@@ -42,6 +42,9 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog';
       <div class="welcome-section">
         <h1>👨‍🏫 Welcome, {{ currentUser?.firstName }}!</h1>
         <p>Manage your courses and students</p>
+        <button mat-stroked-button color="primary" routerLink="/contact">
+        <mat-icon>help_outline</mat-icon> Contact Support
+        </button>
       </div>
 
       <div class="stats-grid">

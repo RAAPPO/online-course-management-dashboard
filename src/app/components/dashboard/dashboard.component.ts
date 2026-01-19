@@ -90,6 +90,14 @@ import { EnrollmentService } from '../../services/enrollment.service';
               <p>Enroll students in courses</p>
             </mat-card-content>
           </mat-card>
+
+          <mat-card class="action-card" routerLink="/support-requests">
+           <mat-card-content>
+              <mat-icon color="warn">support_agent</mat-icon>
+               <h3>Support Requests</h3>
+              <p>View & resolve user messages</p>
+            </mat-card-content>
+          </mat-card>
         </div>
       </div>
 

@@ -31,6 +31,9 @@ import { Enrollment } from '../../models/enrollment.model';
       <div class="welcome-section">
         <h1>👨‍🎓 Welcome, {{ currentUser?.firstName }}!</h1>
         <p>Manage your courses and track your progress</p>
+        <button mat-stroked-button color="primary" routerLink="/contact">
+        <mat-icon>support_agent</mat-icon> Contact Support
+        </button>
       </div>
 
       <!-- Stats Cards -->

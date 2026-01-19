@@ -20,6 +20,7 @@ import { EditTeacherComponent } from './components/edit-teacher/edit-teacher.com
 import { TeacherDetailComponent } from './components/teacher-detail/teacher-detail.component';
 import { StudentDetailComponent } from './components/student-detail/student-detail.component';
 import { ContactComponent } from './components/contact/contact.component';
+import { SupportRequestsComponent } from './components/support-requests/support-requests.component';
 
 export const routes: Routes = [
   { path: '', redirectTo:  '/login', pathMatch: 'full' },
@@ -132,6 +133,12 @@ export const routes: Routes = [
     data: { roles: ['admin'] }
   },
 
+  { 
+  path: 'support-requests', 
+  component: SupportRequestsComponent,
+  canActivate: [authGuard, roleGuard],
+  data: { roles: ['admin'] } 
+  },
   
   { 
     path: 'settings', 
