@@ -7,7 +7,7 @@ import { Student } from '../models/student.model';
   providedIn: 'root'
 })
 export class StudentService {
-  private apiUrl = 'http://localhost:3000/students';
+  private apiUrl = 'api/students';
 
   constructor(private http: HttpClient) {}
 
