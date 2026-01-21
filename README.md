@@ -2,6 +2,9 @@
 
 A comprehensive Angular application for managing an educational platform. This system features role-based access for Admins, Teachers, and Students, allowing for course creation, enrollment management, and data visualization.
 
+🔗 **[Click Here to View Live Demo- https://raappo.github.io/online-course-management-dashboard/ ](https://raappo.github.io/online-course-management-dashboard/)**
+
+
 ## 🚀 Features
 
 * **Role-Based Dashboards:**
