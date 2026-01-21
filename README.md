@@ -1,59 +1,60 @@
-# OnlineCourseManagementDashboard
+# Online Course Management Dashboard
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.10.
+A comprehensive Angular application for managing an educational platform. This system features role-based access for Admins, Teachers, and Students, allowing for course creation, enrollment management, and data visualization.
 
-## Development server
+## 🚀 Features
 
-To start a local development server, run:
+* **Role-Based Dashboards:**
+    * **Admin:** Manage all courses, students, and teachers. View system-wide statistics.
+    * **Teacher:** Manage assigned courses and view enrolled students.
+    * **Student:** Browse courses, enroll, and view personal progress.
+* **Data Management:** Full CRUD (Create, Read, Update, Delete) capabilities.
+* **Real-time Feedback:** Interactive UI using Angular Material (Snackbars, Dialogs).
+* **Backend Simulation:** Uses `json-server` to simulate a real REST API with data persistence.
 
+## 🛠️ Tech Stack
+
+* **Frontend:** Angular (20.3.10), Angular Material, RxJS
+* **Backend:** JSON Server (Mock REST API)
+* **Styling:** SCSS, Angular Material Components
+
+## ⚙️ Installation & Setup (For Examiners)
+
+To run this project, you need to open **two separate terminals**.
+
+### Step 1: Install Dependencies
+Open your project folder in a terminal and run:
+```bash
+npm install
+```
+Step 2: Start the Mock Backend (Terminal 1)
+This simulates the database. Keep this terminal running.
+```bash
+npx json-server --watch db.json --port 3000
+```
+The API will be available at http://localhost:3000
+
+Step 3: Start the Angular App (Terminal 2)
+Open a second terminal window and run:
 ```bash
 ng serve
 ```
+Navigate to http://localhost:4200/ in your browser.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+🔑 Login Credentials
+You can use the buttons on the login page or these credentials:
 
-## Code scaffolding
+Admin: admin@school.com / admin123
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Teacher: teacher@school.com / teacher123
 
-```bash
-ng generate component component-name
-```
+Student: student@school.com / student123
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+📂 Project Structure
+src/app/components: Individual feature dashboards.
 
-```bash
-ng generate --help
-```
+src/app/services: HTTP services communicating with the backend.
 
-## Building
+src/app/models: TypeScript interfaces for type safety.
 
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+db.json: The local database file containing all application data.
