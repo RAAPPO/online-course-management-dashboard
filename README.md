@@ -1,6 +1,7 @@
 # Online Course Management Dashboard
 
 A comprehensive Angular application for managing an educational platform. This system features role-based access for Admins, Teachers, and Students, allowing for course creation, enrollment management, and data visualization.
+NOTE: DONT MERGE DEPLOY-DEMO WITH THE MASTER BRANCH, DEPLOY-DEMOIS PURELY FOR SERVERLESS DEMO
 
 🔗 **[Click Here to View Live Demo- https://raappo.github.io/online-course-management-dashboard/ ](https://raappo.github.io/online-course-management-dashboard/)**
 
