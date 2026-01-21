@@ -69,6 +69,12 @@ ng serve
 Navigate to http://localhost:4200/.
 🔐 Login CredentialsThe demo comes pre-loaded with these accounts:
 
+Admin: admin@school.com / admin123
+
+Teacher: teacher@school.com / teacher123
+
+Student: student@school.com / student123
+
 © 2026 Online Course Management System.
 
 To view the full architectural version with persistent data storage, please switch to the master branch.
